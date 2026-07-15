@@ -1,0 +1,47 @@
+spring.application.name=simple-rag
+
+# Supabase PostgreSQL Connection
+spring.datasource.url=jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+spring.datasource.username=postgres.lghrvykltucvcuewisrn
+spring.datasource.password=YOUR_SUPABASE_PASSWORD
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# Hibernate / JPA
+spring.jpa.hibernate.ddl-auto=create
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# Connection Pool Settings
+spring.datasource.hikari.maximum-pool-size=3
+spring.datasource.hikari.minimum-idle=1
+    
+# Server Port
+server.port=8080
+
+# JWT Configuration
+jwt.secret=YOUR_JWT_SECRET
+
+# Gemini AI Configuration
+gemini.api.key=YOUR_GEMINI_API_KEY
+gemini.model.name=gemini-2.5-flash
+
+# File Upload Configuration
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+app.upload.dir=uploads/
+
+# RabbitMQ / CloudAMQP
+spring.rabbitmq.addresses=amqps://miymzypn:YOUR_RABBITMQ_PASSWORD@warthog.lmq.cloudamqp.com/miymzypn
+cloudamqp.queue.name=rag
+
+# Cloudflare R2
+r2.endpoint=https://7c8ed18eea2cd84d7ddcfe6483ccfe27.r2.cloudflarestorage.com
+r2.access-key=YOUR_R2_ACCESS_KEY
+r2.secret-key=YOUR_R2_SECRET_KEY
+r2.bucket-name=javarag
+
+# LangChain4j Debug Logging
+logging.level.dev.langchain4j=DEBUG
+logging.level.dev.langchain4j.service=DEBUG
+logging.level.dev.langchain4j.model=DEBUG
