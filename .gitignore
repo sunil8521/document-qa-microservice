@@ -8,9 +8,6 @@ Thumbs.db
 # Java / Spring Build outputs
 **/target/
 **/*.class
-**/mvnw
-**/mvnw.cmd
-**/.mvn/
 
 # Node.js Client
 **/node_modules/
