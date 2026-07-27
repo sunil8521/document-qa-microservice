@@ -22,6 +22,12 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.cookie.secure:false}")
+    private boolean cookieSecure;
+
+    @org.springframework.beans.factory.annotation.Value("${app.cookie.samesite:Lax}")
+    private String cookieSameSite;
+
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse> signup(@Valid @RequestBody SignupRequest request) {
         authService.registerUser(request);
@@ -34,10 +40,10 @@ public class AuthController {
 
         ResponseCookie cookie = ResponseCookie.from("jwt", token)
                 .httpOnly(true)
-                .secure(false) // Set to true if using HTTPS
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(30 * 60) // 30 minutes
-                .sameSite("Lax")
+                .sameSite(cookieSameSite)
                 .build();
 
         return ResponseEntity.ok()
@@ -57,10 +63,10 @@ public class AuthController {
     public ResponseEntity<ApiResponse> logout() {
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(0) // Expire immediately
-                .sameSite("Lax")
+                .sameSite(cookieSameSite)
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
