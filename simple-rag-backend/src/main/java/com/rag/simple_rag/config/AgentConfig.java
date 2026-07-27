@@ -82,58 +82,23 @@ public class AgentConfig {
                 .build();
     }
 
-    @Bean
-    public ContentRetriever contentRetriever(EmbeddingStore<TextSegment> embeddingStore,
-                                             EmbeddingModel embeddingModel) {
-        ContentRetriever pgVectorRetriever = EmbeddingStoreContentRetriever.builder()
-                .embeddingStore(embeddingStore)
-                .embeddingModel(embeddingModel)
-                .maxResults(3)
-                .minScore(0.6)
-                .build();
-
-        // Custom retriever that bypasses retrieval for simple greetings/casual chat
-        return query -> {
-            String text = query.text().trim().toLowerCase().replaceAll("[^a-z0-9\\s]", "");
-            if (text.equals("hi") || text.equals("hello") || text.equals("hey") ||
-                text.equals("thanks") || text.equals("thank you") || text.equals("bye") ||
-                text.equals("ok") || text.equals("okay")) {
-                log.info("[RAG] Casual message '{}' matched. Skipping document retrieval.", query.text());
-                return java.util.Collections.emptyList();
-            }
-            log.info("[RAG] Retrieving context for query: '{}'", query.text());
-            return pgVectorRetriever.retrieve(query);
-        };
+    @Bean("chatMemoryProvider")
+    public ChatMemoryProvider chatMemoryProvider() {
+        return memoryId -> MessageWindowChatMemory.withMaxMessages(20);
     }
 
-    @Bean
-    public ChatMemoryProvider chatMemoryProvider(PersistentChatMemoryStore persistentChatMemoryStore) {
-        return memoryId -> MessageWindowChatMemory.builder()
-                .id(memoryId)
-                .maxMessages(20)
-                .chatMemoryStore(persistentChatMemoryStore)
-                .build();
-    }
-
-    @Bean
-    public RetrievalAugmentor retrievalAugmentor(ChatModel chatModel, ContentRetriever contentRetriever) {
-        log.info("[CONFIG] Building DefaultRetrievalAugmentor with CompressingQueryTransformer");
-        return DefaultRetrievalAugmentor.builder()
-                .queryTransformer(new CompressingQueryTransformer(chatModel))
-                .contentRetriever(contentRetriever)
-                .build();
-    }
-
-    @Bean
-    public AssistantAgent assistantAgent(ChatModel chatModel,
-                                         ChatMemoryProvider chatMemoryProvider,
-                                         RetrievalAugmentor retrievalAugmentor) {
-        log.info("[CONFIG] Building AssistantAgent with RetrievalAugmentor + storeRetrievedContentInChatMemory=false");
-        return AiServices.builder(AssistantAgent.class)
-                .chatModel(chatModel)
-                .chatMemoryProvider(chatMemoryProvider)
-                .retrievalAugmentor(retrievalAugmentor)
-                .storeRetrievedContentInChatMemory(false) // Only original user messages saved to DB
-                .build();
-    }
+    // @Bean
+    // public RetrievalAugmentor contentRetrival(
+    //         @org.springframework.beans.factory.annotation.Qualifier("embeddingStore") EmbeddingStore<TextSegment> embeddingStore,
+    //         EmbeddingModel embeddingModel) {
+    //     ContentRetriever documentRetriever = EmbeddingStoreContentRetriever.builder()
+    //             .embeddingStore(embeddingStore)
+    //             .embeddingModel(embeddingModel)
+    //             .maxResults(3)
+    //             .minScore(0.6)
+    //             .build();
+    //     return DefaultRetrievalAugmentor.builder()
+    //             .contentRetriever(documentRetriever)
+    //             .build();
+    // }
 }

@@ -41,6 +41,19 @@ public class ChatSessionService {
         return sessionRepository.save(session);
     }
 
+    @Transactional
+    public void addMessage(String sessionId, String type, String content) {
+        ChatSessionEntity session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+
+        ChatMessageEntity message = ChatMessageEntity.builder()
+                .session(session)
+                .messageType(type)
+                .content(content)
+                .build();
+        messageRepository.save(message);
+    }
+
     public List<ChatSessionEntity> getUserSessions() {
         return sessionRepository.findByUser_EmailOrderByCreatedAtDesc(currentUser().getEmail());
     }

@@ -36,27 +36,33 @@ public class ChatController {
             sessionId = sessionService.createSession(title).getSessionId();
         }
 
-        // Get AI response with sources
+        // Save user message to DB for the UI
+        sessionService.addMessage(sessionId, "USER", request.getMessage());
+
+        // Get AI response
         Result<String> result = assistantAgent.chat(sessionId, request.getMessage());
         String aiResponse = result.content();
 
+        // Save AI response to DB for the UI
+        sessionService.addMessage(sessionId, "AI", aiResponse);
+
         // Extract document IDs from retrieved sources (null if no docs used/matched)
-        List<String> sourceDocumentIds = null;
-        if (result.sources() != null && !result.sources().isEmpty()) {
-            sourceDocumentIds = result.sources().stream()
-                    .filter(content -> content.textSegment() != null)
-                    .map(content -> content.textSegment().metadata().getString("document_id"))
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .collect(Collectors.toList());
+        // List<String> sourceDocumentIds = null;
+        // if (result.sources() != null && !result.sources().isEmpty()) {
+        //     sourceDocumentIds = result.sources().stream()
+        //             .filter(content -> content.textSegment() != null)
+        //             .map(content -> content.textSegment().metadata().getString("document_id"))
+        //             .filter(Objects::nonNull)
+        //             .distinct()
+        //             .collect(Collectors.toList());
 
-            if (sourceDocumentIds.isEmpty()) {
-                sourceDocumentIds = null;
-            }
-        }
+        //     if (sourceDocumentIds.isEmpty()) {
+        //         sourceDocumentIds = null;
+        //     }
+        // }
 
-        log.info("[CHAT] Response: '{}', Source IDs: {}", aiResponse, sourceDocumentIds);
+        log.info("[CHAT] Response: '{}', Source IDs: {}", aiResponse);
 
-        return ResponseEntity.ok(new ApiResponse(true, aiResponse, sessionId, sourceDocumentIds));
+        return ResponseEntity.ok(new ApiResponse(true, aiResponse, sessionId, null));
     }
 }

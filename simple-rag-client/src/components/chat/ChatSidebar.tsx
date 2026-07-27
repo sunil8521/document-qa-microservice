@@ -8,6 +8,7 @@ import { GiWhiteBook } from 'react-icons/gi';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { useChatStore, type Document } from '../../store/useChatStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useLogoutMutation } from '../../hooks/useAuth';
 import { useDocumentUpload, useDocumentStatus, useUserDocuments, useDeleteDocumentMutation } from '../../hooks/useDocuments';
 import { useChatSessions, useDeleteSessionMutation } from '../../hooks/useChatSessions';
 import toast from 'react-hot-toast';
@@ -94,13 +95,9 @@ export function ChatSidebar() {
   } = useChatStore();
 
   const user = useAuthStore((state: any) => state.user);
-  const setAuth = useAuthStore((state: any) => state.setAuth);
   const navigate = useNavigate();
   const { sessionId: urlSessionId } = useParams();
-
-  const logout = () => {
-    setAuth(false, null);
-  };
+  const logoutMutation = useLogoutMutation();
 
   useEffect(() => {
     // Close sidebar by default on mobile screens (width < 768) on initial load
@@ -199,8 +196,9 @@ export function ChatSidebar() {
   );
 
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => navigate('/')
+    });
   };
 
   const closeMobile = () => {
